@@ -2,6 +2,13 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Car, Rental
 from .forms import RentalForm
+from django.shortcuts import render
+from .models import Car
+
+def car_list(request):
+    cars = Car.objects.all()
+    return render(request, 'myapp/car_list.html', {'cars': cars})
+
 
 def car_list(request):
     cars = Car.objects.filter(available=True)

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доступные автомобили</title>
+</head>
+<body>
+    <h1>Доступные автомобили для аренды</h1>
+
+    <!-- Список, если есть доступные автомобили -->
+    {% if cars %}
+    <ul>
+        {% for car in cars %}
+        <li>
+            <!-- Название автомобиля и его цена -->
+            <strong>{{ car.name }}</strong> - {{ car.price_per_day }} руб/день
+            <br>
+            <!-- Ссылка на аренду автомобиля -->
+            <a href="{% url 'rent_car' car.id %}">Арендовать</a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>Нет доступных автомобилей.</p>
+    {% endif %}
+
+</body>
+</html>
