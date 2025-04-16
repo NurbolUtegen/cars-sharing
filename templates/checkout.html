@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Rental Checkout</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .checkout-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        .checkout-button {
+            background-color: #6772e5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+        .checkout-button:hover {
+            background-color: #5469d4;
+        }
+        .loading {
+            display: none;
+            margin-top: 20px;
+        }
+        .error-message {
+            color: #ff3860;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="checkout-container">
+        <h1>Complete Your Payment</h1>
+        <p>You're renting: <strong>{{ rental.car.model }}</strong></p>
+        <p>Total amount: <strong>${{ rental.total_price }}</strong></p>
+        <p>Rental period: {{ rental.start_date }} to {{ rental.end_date }}</p>
+        
+        <button id="checkout-button" class="checkout-button">
+            Pay with Card
+        </button>
+        
+        <div id="loading" class="loading">
+            Processing your payment...
+        </div>
+        
+        <div id="error-message" class="error-message"></div>
+    </div>
+
+    <script>
+        // Инициализация Stripe с вашим публичным ключом
+        const stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
+        const checkoutButton = document.getElementById('checkout-button');
+        const loadingIndicator = document.getElementById('loading');
+        const errorMessage = document.getElementById('error-message');
+        
+        checkoutButton.addEventListener('click', async function() {
+            // Показываем индикатор загрузки
+            checkoutButton.disabled = true;
+            loadingIndicator.style.display = 'block';
+            errorMessage.textContent = '';
+            
+            try {
+                // Отправляем запрос на создание сессии
+                const response = await fetch("/create-checkout-session/{{ rental.id }}/", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const session = await response.json();
+                
+                // Перенаправляем на страницу оплаты Stripe
+                const result = await stripe.redirectToCheckout({
+                    sessionId: session.id
+                });
+                
+                if (result.error) {
+                    throw result.error;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorMessage.textContent = error.message || 'An error occurred during payment processing.';
+                checkoutButton.disabled = false;
+                loadingIndicator.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
