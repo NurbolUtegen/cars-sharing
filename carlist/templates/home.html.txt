@@ -1,0 +1,12 @@
+<!-- carlist/templates/home.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Car Sharing</title>
+</head>
+<body>
+    <h1>Добро пожаловать в наш каршеринг!</h1>
+    <p><a href="/admin/">Админка</a></p>
+    <p><a href="/api/">Перейти к API</a></p>
+</body>
+</html>
